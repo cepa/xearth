@@ -1,0 +1,887 @@
+.TH xearth 1 "November 1999" "KLJ"
+
+.SH NAME
+xearth - displays a shaded image of the Earth in an X window
+
+.SH SYNOPSIS
+.B xearth
+.RB [ \-proj
+.I proj_type
+]
+.RB [ \-pos 
+.I pos_spec
+]
+.RB [ \-rot
+.I angle
+]
+.RB [ \-sunpos 
+.I sun_pos_spec
+]
+.RB [ \-mag
+.I factor
+]
+.RB [ \-size
+.I size_spec
+]
+.RB [ \-shift
+.I shift_spec
+]
+.RB [ \-shade \fP|\fB \-noshade ]
+.RB [ \-label \fP|\fB \-nolabel ]
+.RB [ \-labelpos
+.I geom
+]
+.RB [ \-markers \fP|\fB \-nomarkers ]
+.RB [ \-markerfile
+.I file
+]
+.RB [ \-showmarkers ]
+.RB [ \-stars \fP|\fB \-nostars ]
+.RB [ \-starfreq
+.I frequency
+]
+.RB [ \-bigstars
+.I percent
+]
+.RB [ \-grid \fP|\fB \-nogrid ]
+.RB [ \-grid1
+.I grid1
+]
+.RB [ \-grid2
+.I grid2
+]
+.RB [ \-day
+.I pct
+]
+.RB [ \-night
+.I pct
+]
+.RB [ \-term
+.I pct
+]
+.RB [ \-gamma
+.I gamma_value
+]
+.RB [ \-wait
+.I secs
+]
+.RB [ \-timewarp
+.I timewarp_factor
+]
+.RB [ \-time
+.I fixed_time
+]
+.RB [ \-onepix \fP|\fB \-twopix ]
+.RB [ \-mono \fP|\fB \-nomono ]
+.RB [ \-ncolors 
+.I num_colors
+]
+.RB [ \-font
+.I font_name
+]
+.RB [ \-root \fP|\fB \-noroot ]
+.RB [ \-geometry
+.I geom
+]
+.RB [ \-title
+.I title
+]
+.RB [ \-iconname
+.I iconname
+]
+.RB [ \-name
+.I name
+]
+.RB [ \-fork \fP|\fB \-nofork ]
+.RB [ \-once \fP|\fB \-noonce ]
+.RB [ \-nice 
+.I priority
+]
+.RB [ \-gif ]
+.RB [ \-ppm ]
+.RB [ \-display 
+.I dpyname
+]
+.RB [ \-version ]
+
+.SH DESCRIPTION
+.I Xearth
+sets the X root window to an image of the Earth, as seen from your
+favorite vantage point in space, correctly shaded for the current
+position of the Sun. By default,
+.I xearth
+updates the displayed image every five minutes. The time between
+updates can be changed with the \fB\-wait\fP option (see below);
+updates can be disabled completely by using the \fB\-once\fP option
+(see below).
+
+If desired,
+.I Xearth
+can be configured to create and render into its own top-level X window
+instead of the root window; see the \fB\-root\fP, \fB\-noroot\fP, and
+\fB\-geometry\fP options (below). Finally,
+.I xearth
+can also render directly into PPM and GIF files instead of drawing
+into an X window; see the \fB\-ppm\fP and \fB\-gif\fP options
+(below).
+
+This man page documents version 1.1 of
+.I xearth.
+
+.SH OPTIONS
+.LP
+\fIXearth\fP understands the following command line options
+(corresponding X resources can be found in the following section):
+
+.TP
+.B \-proj \fIproj_type\fP
+Specify the projection type \fIxearth\fP should use. Supported
+projection types are \fImercator\fP, \fIorthographic\fP, and
+\fIcylindrical\fP; these can either be spelled out in full or
+abbreviated to \fImerc\fP, \fIorth\fP, or \fIcyl\fP,
+respectively. \fIXearth\fP uses an orthographic projection by
+default.
+
+.TP
+.B \-pos \fIpos_spec\fP
+Specify the position from which the Earth should be viewed. The
+\fIpos_spec\fP (position specifier) consists of a keyword, possibly
+followed by additional arguments. Valid keywords are: \fIfixed\fP,
+\fIsunrel\fP, \fIorbit\fP, \fImoon\fP, and \fIrandom\fP. (If you're
+having problems getting \fIxearth\fP to accept a position specifier as
+a command line argument, make sure and read the comments about
+position specifier delimiters and using explicit quoting in the sixth
+paragraph following this one.)
+
+The position specifier keyword \fIfixed\fP should be followed by two
+arguments, interpreted as numerical values indicating the latitude and
+longitude (expressed in decimal degrees) of a viewing position that is
+fixed with respect to the Earth's surface. Positive and negative
+values of latitude correspond to positions north and south of the
+equator, respectively. Positive and negative values of longitude
+correspond to positions east and west of Greenwich, respectively.
+
+The position specifier keyword \fIsunrel\fP should be followed by two
+arguments, interpreted as numerical values indicating the offsets in
+latitude and longitude (expressed in decimal degrees) of a viewing
+position that is fixed with respect to the position of the
+Sun. Positive and negative values of latitude and longitude are
+interpreted as for the \fIfixed\fP keyword.
+
+The position specifier keyword \fIorbit\fP should be followed by two
+arguments, interpreted as numerical values indicating the period (in
+hours) and orbital inclination (in decimal degrees) of a simple
+circular orbit; the viewing position follows this orbit. Astute
+readers will surely note that these parameters are not sufficient to
+uniquely specify a single circular orbit. This problem is solved by
+limiting the space of possible orbits to those positioned over 0
+degrees latitude, 0 degrees longitude at time zero (the Un*x epoch,
+see \fBtime(3)\fP).
+
+The position specifier keyword \fImoon\fP should not be followed by
+any arguments. When this keyword is used, the viewing position is the
+current position of the moon, recalculated at each update.
+
+The position specifier keyword \fIrandom\fP should not be followed by
+any arguments. When this keyword is used, the viewing position is
+selected at random each time an update occurs.
+
+Components of a position specifier are delimited by either whitespace,
+forward slashes (/), or commas. Note that using whitespace to separate
+position specifier components when invoking \fIxearth\fP from a shell
+may require explicit quoting to ensure the entire position specifier
+is passed as a single argument. For example, if you want to use spaces
+to delimit components and are using a "typical" shell, you'd need to
+use something like:
+
+.nf
+    -pos "fixed 42.33 -71.08"
+.fi
+
+or
+
+.nf
+    -pos 'fixed 42.33 -71.08'
+.fi
+
+to make things work. If you'd rather not have to explicitly quote
+things, you can use forward slashes or commas instead of spaces to
+separate components, as shown below.
+
+.nf
+    -pos fixed,42.33,-71.08
+    -pos fixed/42.33/-71.08
+.fi
+
+If a position specifier is not provided, \fIxearth\fP uses a default
+position specifier of "sunrel 0 0" (such that the entire day side of
+the Earth is always visible).
+
+.TP
+.B \-rot \fIangle\fP
+Specify a rotated viewing position such that the north is not
+"straight up" in the center of the rendered image. The \fIangle\fP can
+be specified either as a numeric value or the keyword \fIgalactic\fP.
+When \fIangle\fP is a numeric, it represents the number of degrees by
+which the image is to be rotated. Positive values of \fIangle\fP
+rotate the rendered image counterclockwise; negative values rotate the
+rendered image clockwise. The keyword \fIgalactic\fP orients the image
+so that the galactic north is straight up: the sun is positioned
+somewhere on the plane passing through the horizontal center of the
+screen. The default value of \fIangle\fP is 0.
+
+.TP
+.B \-sunpos \fIsun_pos_spec\fP
+Specify a fixed point on the Earth's surface where the Sun is always
+directly overhead. The \fIsun_pos_spec\fP (Sun position specifier)
+consists of two components, both numerical values; these components
+are interpreted as the latitude and longitude (in decimal degrees) of
+the point where the Sun is directly overhead.
+
+The details provided for position specifiers (see above) about the
+interpretation of positive and negative latitude and longitude values
+and the characters used to delimit specifier components apply to Sun
+position specifiers as well.
+
+By default, \fIxearth\fP calculates the actual position of the Sun and
+updates this position with the progression of time.
+
+.TP
+.B \-mag \fIfactor\fP
+Specify the magnification of the displayed image. When the
+orthographic projection is in use, the diameter of the rendered Earth
+image is \fIfactor\fP times the shorter of the width and height of the
+image (see the \fB\-size\fP option, below). For the mercator and
+cylindrical projections, the width of the rendered image is
+\fIfactor\fP times the width of the image (see the \fB\-size\fP
+option, below). The default magnification factor is 1.
+
+.TP
+.B \-size \fIsize_spec\fP
+Specify the size of the image to be rendered. The \fIsize_spec\fP
+(size specifier) consists of two components, both positive integers;
+these components are interpreted as the width and height (in pixels)
+of the image.
+
+The details provided for position specifiers (see above) about the
+characters used to delimit specifier components apply to size
+specifiers as well.
+
+When rendering into the X root window, these values default to the
+dimensions of the root window. When producing a PPM or GIF file
+instead of drawing in the X root window (see the \fB\-ppm\fP and
+\fB\-gif\fP options, below), both values default to 512.
+
+When rendering into its own top-level X window, any values specified
+using this option are ignored; dimensions for the top-level window can
+be specified using the \fB\-geometry\fP option.
+
+.TP
+.B \-shift \fIshift_spec\fP
+Specify that the center of the rendered Earth image should be shifted
+by some amount from the center of the image. The \fIshift_spec\fP
+(shift specifier) consists of two components, both integers; these
+components are interpreted as the offsets (in pixels) in the X and Y
+directions.
+
+The details provided for position specifiers (see above) about the
+characters used to delimit specifier components apply to shift
+specifiers as well.
+
+By default, the center of the rendered Earth image is aligned with the
+center of the image.
+
+.TP
+.B \-shade \fP|\fB \-noshade
+Enable/disable shading. When shading is enabled, the surface of the
+Earth is shaded according to the current position of the Sun (and the
+values provided for the \fB\-day\fP, \fB\-night\fP, and \fB\-term\fP
+options, below). When shading is disabled, use flat colors (green and
+blue) to render land and water. Shading is enabled by default.
+
+.TP
+.B \-label \fP|\fB \-nolabel
+Enable/disable labeling. If labeling is enabled and \fIxearth\fP is
+rendering into an X window, provide a label that indicates the current
+date and time and current viewing and sun positions. The position of
+the label can be controlled using the \fB\-labelpos\fP option (see
+below). Labeling is disabled by default.
+
+.TP
+.B \-labelpos \fIgeom\fP
+Specify where the label should be drawn. If labeling is enabled and
+\fIxearth\fP is rendering into an X window, \fIgeom\fP is interpreted
+as the "position" part an X-style geometry specification (\fIe.g.\fP,
+{+-}<\fIxoffset\fP>{+-}<\fIyoffset\fP>; positive and negative values
+of \fIxoffset\fP denote offsets from the left and right edges of the
+display, respectively; positive and negative values of \fIyoffset\fP
+denote offsets from the top and bottom edges of the display,
+respectively) indicating how the label should be positioned.  The
+label position defaults to "-5-5" (\fIi.e.\fP, five pixels inside the
+lower right-hand corner of the display).
+
+.TP
+.B \-markers \fP|\fB \-nomarkers
+Enable/disable markers. If markers are enabled and \fIxearth\fP is
+rendering into an X window, display small red circles and text labels
+indicating the location of interesting places on the Earth's
+surface. Markers are enabled by default.
+
+.TP
+.B \-markerfile \fIfile\fP
+Specify a file from which user-defined marker data (locations and
+names) should be read. Each line in the marker data file consists of
+three required components: the latitude and longitude (expressed in
+decimal degrees) followed by the text of the label that should be
+used. Individual components are delimited by either whitespace,
+forward slashes (/), or commas. Components that need to include
+delimiter characters (\fIe.g.\fP, a multi-word label) should be
+enclosed in double quotes. For example, a line in a typical marker
+data file might look something like:
+
+.nf
+    42.33 -71.08 "Boston, MA"    # USA
+.fi
+
+Everything between a `#' character and the end of a line, inclusive,
+is a considered to be a comment. Blank lines and lines containing only
+comments are allowed.
+
+In addition to the three required components, \fIxearth\fP supports
+optional following "key=value" components. In this version of
+\fIxearth\fP, the only supported "key" is "align", which can be used
+to control where marker labels are drawn in relation to the marker
+proper. Supported alignment values are "left", "right", "above", and
+"below"; the default behavior (if no alignment is specified) is
+"align=right".
+
+The marker data file is reread every time \fIxearth\fP redraws an
+image into an X window. In this way, the marker positions and labels
+can be dynamic (\fIe.g.\fP, given appropriate data sources, markers
+could be used to encode hurricane positions, where earthquakes have
+happened recently, temperatures at fixed locations, or other forms of
+"real-time" data).
+
+\fIXearth\fP includes a built-in set of marker data for 76 major
+locations around the world. The built-in data can be selected by
+specifying "built-in" for the \fIfile\fP argument; this is the default
+behavior. The built-in set of marker data can be examined either by
+using the \fB\-showmarkers\fP option (see below) or by reading the
+BUILT-IN file included with the \fIxearth\fP source distribution (see
+OBTAINING THE \fIXEARTH\fP SOURCE DISTRIBUTION, below).
+
+.TP
+.B \-showmarkers
+This option indicates that \fIxearth\fP should load the marker data
+(whether built-in or user-specified), print a copy of it to standard
+out in a form suitable for use with the \fB\-markers\fP option (see
+above), and then exit.
+
+.TP
+.B \-stars \fP|\fB \-nostars
+Enable/disable stars. If stars are enabled, the black background of
+"space" is filled with a random pattern of "stars" (individual white
+pixels). The fraction of background pixels that are turned into stars
+can be controlled with the \fB\-starfreq\fP option (see below). Stars
+are enabled by default.
+
+.TP
+.B \-starfreq \fIfrequency\fP
+Set the density of the random star pattern (see \fB\-stars\fP, above);
+\fIfrequency\fP indicates the fraction of background pixels that
+should be turned into "stars". The default value of \fIfrequency\fP is
+0.002.
+
+.TP
+.B \-bigstars \fIpercent\fP
+Set the percentage of double-width stars (see \fB\-stars\fP, above);
+by default, all stars are a single pixel, but this option can be used
+to create some stars that are composed of two horizontal pixels.  This 
+provides a slightly less uniform look to the "night sky".
+
+.TP
+.B \-grid \fP|\fB \-nogrid
+Enable/disable the display of a longitude/latitude grid on the Earth's
+surface. The spacing of major grid lines and dots between major grid
+lines can be controlled with the \fB\-grid1\fP and \fB\-grid2\fP
+options (see below). Grid display is disabled by default.
+
+.TP
+.B \-grid1 \fIgrid1\fP
+Specify the spacing of major grid lines if grid display (see
+\fB\-grid\fP, above) is enabled; major grid lines are drawn with a
+90/\fIgrid1\fP degree spacing. The default value for \fIgrid1\fP is 6,
+corresponding to 15 degrees between major grid lines.
+
+.TP
+.B \-grid2 \fIgrid2\fP
+Specify the spacing of dots along major grid lines if grid display
+(see \fB\-grid\fP, above) is enabled. Along the equator and lines of
+longitude, grid dots are drawn with a 90/(\fIgrid1\fP x \fIgrid2\fP)
+degree spacing. The spacing of grid dots along parallels (lines of
+latitude) other than the equator is adjusted to keep the surface
+distance between grid dots approximately constant. The default value
+for \fIgrid2\fP is 15; combined with the default \fIgrid1\fP value of
+6, this corresponds to placing grid dots on a one degree spacing.
+
+.TP
+.B \-day \fIpct\fP
+Specify the brightness that should be used to shade the day side of
+the Earth when shading is enabled. \fIPct\fP should be an integer
+between 0 and 100, inclusive, where 0 indicates total darkness and 100
+indicates total illumination. This value defaults to 100.
+
+.TP
+.B \-night \fIpct\fP
+Specify the brightness that should be used to shade the night side of
+the Earth when shading is enabled. \fIPct\fP should be an integer
+between 0 and 100, inclusive, where 0 indicates total darkness and 100
+indicates total illumination. This value defaults to 5 (if this seems
+overly dark, you may want to double-check that appropriate gamma
+correction is being employed; see \fB\-gamma\fP, below).
+
+.TP
+.B \-term \fIpct\fP
+Specify the shading discontinuity at the terminator (day/night
+line). \fIPct\fP should be an integer between 0 and 100, inclusive. A
+value of \fIx\fP indicates that the shading should immediately jump
+\fIx\fP percent of the difference between day and night shading values
+(see \fB\-day\fP and \fB\-night\fP, above) when crossing from the
+night side to the day side of the terminator. Thus a value of 0
+indicates no discontinuity (the original \fIxearth\fP behavior), and a
+value of 100 yields a maximal discontinuity (such that the entire day
+side of the earth is shaded with the \fB\-day\fP shading value). This
+value defaults to 1.
+
+.TP
+.B \-gamma \fIgamma_value\fP
+When \fIxearth\fP is rendering into an X window, adjust the colors
+\fIxearth\fP uses by a gamma value. Values less than 1.0 yield darker
+colors; values greater than 1.0 yield brighter colors. The default
+\fIgamma_value\fP is 1.0, appropriate for use on systems with built-in
+gamma correction. For systems without built-in gamma correction,
+appropriate gamma values are often in the 2.3 to 2.6 range.
+
+See the GAMMA-TEST file included with the \fIxearth\fP source
+distribution for information about a simple test that allows you to
+directly estimate the gamma of your display system (see OBTAINING THE
+\fIXEARTH\fP SOURCE DISTRIBUTION, below).
+
+.TP
+.B \-wait \fIsecs\fP
+When rendering into an X window, wait \fIsecs\fP seconds between
+updates. This value defaults to 300 seconds (five minutes).
+
+.TP
+.B \-timewarp \fItimewarp_factor\fP
+Scale the apparent rate at which time progresses by
+\fItimewarp_factor\fP. The default value of \fItimewarp_factor\fP is
+1.0.
+
+.TP
+.B \-time \fIfixed_time\fP
+Instead of using the current time to determine the "value" of
+time-dependent positions (\fIe.g.\fP, the position the sun), use a
+particular \fIfixed_time\fP (expressed in seconds since the Un*x epoch
+(see \fBtime(3)\fP).
+
+.TP
+.B \-onepix \fP|\fB \-twopix
+Specify whether \fIxearth\fP should use one or two pixmaps when
+rendering into an X window. If only one pixmap is used, partial
+redraws may be visible at times in the window (when areas of the
+window are exposed and redrawn during the time \fIxearth\fP is
+rendering the next image). If two pixmaps are used, \fIxearth\fP uses
+them to double-buffer changes such that partial redraws are (almost?)
+never seen. Using only one pixmap has the advantage of using quite a
+bit less memory in the X server; this can be important in environments
+where server-side memory is a fairly limited resource. Two pixmaps is
+the default.
+
+.TP
+.B \-mono \fP|\fB \-nomono
+If rendering into an X window, enable/disable monochrome mode.
+Monochrome mode is enabled by default on systems with one-bit
+framebuffers (see the "depth of root window" information provided by
+\fBxdpyinfo(1)\fP) and disabled by default otherwise.
+
+.TP
+.B \-ncolors \fInum_colors\fP
+If rendering into an X window or a GIF output file, specify the number
+of colors that should be used. (If markers are enabled (see
+\fB\-markers\fP, above), the actual number of colors used may be one
+larger than \fInum_colors\fP.) The default value of \fInum_colors\fP
+is 64.
+
+When rendering into an X window, the maximum allowable value for
+\fInum_colors\fP is 1024. In practice, using values of
+\fInum_colors\fP larger than twice the number of distinct shades of
+red, green, or blue supported by your hardware is likely to provide
+little additional benefit, or, in some cases, produce "banding"
+effects in the image. Thus, on systems that can support 256 distinct
+shades of red, green, or blue (eight bits per component), the largest
+practical value of \fInum_colors\fP is around 512. Similarly, on
+systems that support only five or six bits per component (\fIe.g.\fP,
+many systems with 16-bit displays), the largest practical value of
+\fInum_colors\fP is probably around 64.
+
+When rendering into a GIF output file, the maximum allowable value for
+\fInum_colors\fP is 256.
+
+.TP
+.B \-font \fIfont_name\fP
+If rendering into an X window, use \fIfont_name\fP for drawing text
+labels (see \fB\-label\fP and \fB\-markers\fP, above). By default,
+\fIxearth\fP uses the "variable" font.
+
+.TP
+.B \-root \fP|\fB \-noroot
+When rendering into an X window, select whether \fIxearth\fP should
+render into the X root window (\fB\-root\fP) or create and render into
+a top-level X window (\fB\-noroot\fP). By default, \fIxearth\fP
+renders into the X root window.
+
+.TP
+.B \-geometry \fIgeom\fP
+Cause \fIxearth\fP to create and render into a top-level X window with
+the specified geometry. When this option is used, the \fB\-noroot\fP
+option can be elided. Use of the \fB\-root\fP overrides the effect of
+\fB\-geometry\fP. By default (if \fB\-noroot\fP is specified by no
+geometry is provided), \fIxearth\fP uses a geometry of "512x512".
+
+.TP
+.B \-title \fItitle\fP
+When rendering into a top-level X window, this option can be used to
+specify the window title string that might be displayed by a window
+manager. By default, \fIxearth\fP uses a title of "xearth".
+
+.TP
+.B \-iconname \fIiconname\fP
+When rendering into a top-level X window, this option can be used to
+specify the icon name that might be used by a window manager for the
+window. By default, \fIxearth\fP uses an icon name of "xearth".
+
+.TP
+.B \-name \fIname\fP
+When rendering into an X window, this option can be used to specify
+the application name under which X resources are obtained, rather than
+the default executable file name. The specified name should not
+contain "." or "*" characters.
+
+.TP
+.B \-fork \fP|\fB \-nofork
+When rendering into an X window, enable/disable forking. If forking is
+enabled, \fIxearth\fP forks a child process to handle all rendering
+calculations and screen updates (in essence, automatically putting
+itself in the background). Forking is disabled by default.
+
+.TP
+.B \-once \fP|\fB \-noonce
+Disable/enable updates. If updates are enabled and \fIxearth\fP is
+rendering into an X window, \fIxearth\fP updates the displayed image
+periodically (the time between updates can be controlled via the
+\fB\-wait\fP option, above). If updates are disabled, \fIxearth\fP
+only renders an image once and then exits. Updates are enabled by
+default.
+
+.TP
+.B \-nice \fIpriority\fP
+Run the \fIxearth\fP process with priority \fIpriority\fP (see
+\fBnice(1)\fP and \fBsetpriority(2)\fP). By default, \fIxearth\fP runs
+at the priority of the process that invoked it, usually 0.
+
+.TP
+.B \-gif
+Instead of drawing in an X window, write a GIF file (eight-bit color)
+to standard out.
+
+.TP
+.B \-ppm
+Instead of drawing in an X window, write a PPM file (24-bit color) to
+standard out.
+
+.TP
+.B \-display \fIdpyname\fP
+Attempt to connect to the X display named \fIdpyname\fP.
+
+.TP
+.B \-version
+Print what version of \fIxearth\fP this is.
+
+.SH X RESOURCES
+.LP
+The behavior of \fIxearth\fP can also be controlled using the
+following X resources:
+
+.TP
+.B proj \fP(projection type)
+Specify the projection type \fIxearth\fP should use (see \fB-proj\fP,
+above).
+
+.TP
+.B pos \fP(position specifier)
+Specify the position from which the Earth should be viewed (see
+\fB\-pos\fP, above).
+
+.TP
+.B rot \fP(float)
+Specify the viewing rotation (see \fB\-rot\fP, above).
+
+.TP
+.B sunpos \fP(sun position specifier)
+Specify a fixed point on the Earth's surface where the Sun is always
+directly overhead (see \fB\-sunpos\fP, above).
+
+.TP
+.B mag \fP(float)
+Specify the magnification of the displayed image (see \fB\-mag\fP,
+above).
+
+.TP
+.B size \fP(size specifier)
+Specify the size of the image to be rendered (see \fB\-size\fP,
+above).
+
+.TP
+.B shift \fP(shift specifier)
+Specify that the center of the rendered Earth image should be shifted
+by some amount from the center of the image (see \fB\-shift\fP,
+above).
+
+.TP
+.B shade \fP(boolean)
+Enable/disable shading (see \fB\-shade\fP, above).
+
+.TP
+.B label \fP(boolean)
+Enable/disable labeling (see \fB\-label\fP, above).
+
+.TP
+.B labelpos \fP(geometry)
+Specify where the label should be drawn (see \fB\-labelpos\fP, above).
+
+.TP
+.B markers \fP(boolean)
+Enable/disable markers (see \fB\-markers\fP, above).
+
+.TP
+.B markerfile \fP(file name)
+Specify a file from which user-defined marker data (locations and
+names) should be read (see \fB\-markerfile\fP, above).
+
+.TP
+.B stars \fP(boolean)
+Enable/disable stars (see \fB\-stars\fP, above).
+
+.TP
+.B starfreq \fP(float)
+Set the density of the random star pattern (see \fB\-starfreq\fP,
+above).
+
+.TP
+.B bigstars \fP(int)
+Set the percentage of stars that are double width (see \fB\-bigstars\fP,
+above).
+
+.TP
+.B grid \fP(boolean)
+Enable/disable the display of a longitude/latitude grid on the Earth's
+surface (see \fB\-grid\fP, above).
+
+.TP
+.B grid1 \fP(integer)
+Specify the spacing of major grid lines if grid display is enabled
+(see \fB\-grid1\fP, above).
+
+.TP
+.B grid2 \fP(integer)
+Specify the spacing of dots along major grid lines if grid display is
+enabled (see \fB\-grid2\fP, above).
+
+.TP
+.B day \fP(integer)
+Specify the brightness that should be used to shade the day side of
+the Earth when shading is enabled (see \fB\-day\fP, above).
+
+.TP
+.B night \fP(integer)
+Specify the brightness that should be used to shade the night side of
+the Earth when shading is enabled (see \fB\-night\fP, above).
+
+.TP
+.B term \fP(integer)
+Specify the shading discontinuity at the terminator (see \fB\-term\fP,
+above).
+
+.TP
+.B gamma \fP(float)
+Specify the gamma correction \fIxearth\fP should use when selecting
+colors (see \fB\-gamma\fP, above).
+
+.TP
+.B wait \fP(integer)
+Specify the delay between updates when rendering into an X window (see
+\fB\-wait\fP, above).
+
+.TP
+.B timewarp \fP(float)
+Specify the apparent rate at which time progresses (see
+\fB\-timewarp\fP, above).
+
+.TP
+.B time \fP(integer)
+Specify a particular fixed time that should be used to determine the
+"value" of time-dependent positions (see \fB\-time\fP, above).
+
+.TP
+.B twopix \fP(boolean)
+Specify whether \fIxearth\fP should use one or two pixmaps when
+rendering into an X window (see \fB\-onepix\fP and \fB\-twopix\fP,
+above).
+
+.TP
+.B mono \fP(boolean)
+Specify whether \fIxearth\fP should use monochrome mode when rendering
+into an X window (see \fB\-mono\fP and \fB\-nomono\fP, above).
+
+.TP
+.B ncolors \fP(integer)
+Specify the number of colors \fIxearth\fP should use (see
+\fB\-ncolors\fP, above). The \fBncolors\fP resource is only used when
+rendering into an X window -- the number of colors to use when
+rendering into a GIF file can only be specified using the
+\fB\-ncolors\fP command line option.
+
+.TP
+.B font \fP(font name)
+Use the named font for drawing text labels (see \fB\-font\fP, above).
+
+.TP
+.B root \fP(boolean)
+Specify whether \fIxearth\fP should render into the X root window or a
+top-level X window (see \fB\-root\fP, \fB\-noroot\fP, and
+\fB\-geometry\fP, above).
+
+.TP
+.B geometry \fP(geometry)
+Specify the geometry of a top-level X window that \fIxearth\fP should
+create and render into (see \fB\-geometry\fP, above).
+
+.TP
+.B title \fP(string)
+When rendering into a top-level X window, specify the window title
+that \fIxearth\fP should use (see \fB\-title\fP, above).
+
+.TP
+.B iconname \fP(string)
+When rendering into a top-level X window, specify the icon name that
+\fIxearth\fP should use (see \fB\-iconname\fP, above).
+
+.TP
+.B fork \fP(boolean)
+When rendering into an X window, enable/disable the automatic forking
+of a child process to handle the updates (see \fB\-fork\fP, above).
+
+.TP
+.B once \fP(boolean)
+When rendering into an X window, disable/enable updates for the
+displayed image (see \fB\-once\fP, above).
+
+.TP
+.B nice \fP(integer)
+Specify the priority at which the \fIxearth\fP process should be run
+(see \fB\-nice\fP, above).
+
+.SH OBTAINING THE \fIXEARTH\fP SOURCE DISTRIBUTION
+The latest-and-greatest version of xearth should always be available
+via a link from the xearth WWW home page (URL
+http://www.cs.colorado.edu/~tuna/xearth/index.html), or, for the
+web-deprived, via anonymous ftp from cag.lcs.mit.edu in /pub/tuna.
+
+.SH NOTES
+Thanks to Frank Solensky for the "-pos moon" and "-rot galactic"
+stuff.
+
+The map information used in
+.I xearth
+was derived from the "CIA World Data Bank II map database," as taken
+from some "cbd" files that were apparently originally generated by
+Brian Reid at DEC WRL.
+
+The Graphics Interchange Format(c) is the Copyright property of
+CompuServe Incorporated. GIF(sm) is a Service Mark property of
+CompuServe Incorporated.
+
+Thanks to Robert Berger for allowing me to include his nifty gamma
+measurement image and associated text in the \fIxearth\fP source
+distribution.
+
+Thanks to Jamie Zawinski for suggesting that I look at his
+xscreensaver package for a good example of how to use the resource and
+command line option parts of Xt; his code saved me piles of lossage.
+
+Thanks to Chris Metcalf for the -bigstars stuff, a pile of general
+source code cleaning, and spell checking everything carefully.
+
+Thanks to Chris Hayward, Chris Metcalf, Sherman Mui, Dan Rich, and
+Leonard Zubkoff for giving the pre-release of version 1.0 a test
+drive.
+
+Kudos to Jef Poskanzer for his excellent PBMPLUS toolkit. 
+
+Finally, thanks to everybody that sent encouragement, suggestions, and
+patches. Apologies to the many people whose good ideas didn't make it
+into this release.
+
+.SH COPYRIGHT
+Copyright (C) 1989, 1990, 1993-1995, 1999 by Kirk Lauritz Johnson
+
+Portions of the \fIxearth\fP source code, as marked, are:
+
+.nf
+  Copyright (C) 1989, 1990, 1991 by Jim Frost
+  Copyright (C) 1992 by Jamie Zawinski <jwz@lucid.com>
+.fi
+
+Permission to use, copy, modify and freely distribute xearth for
+non-commercial and not-for-profit purposes is hereby granted without
+fee, provided that both the above copyright notice and this permission
+notice appear in all copies and in supporting documentation.
+
+Unisys Corporation holds worldwide patent rights on the Lempel Zev
+Welch (LZW) compression technique employed in the CompuServe GIF image
+file format as well as in other formats. Unisys has made it clear,
+however, that it does not require licensing or fees to be paid for
+freely distributed, non-commercial applications (such as xearth) that
+employ LZW/GIF technology. Those wishing further information about
+licensing the LZW patent should contact Unisys directly at
+(lzw_info@unisys.com) or by writing to
+
+.nf
+  Unisys Corporation
+  Welch Licensing Department
+  M/S-C1SW19
+  P.O. Box 500
+  Blue Bell, PA 19424
+.fi
+
+The author makes no representations about the suitability of this
+software for any purpose. It is provided "as is" without express or
+implied warranty.
+
+\fBTHE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.\fP
+
+.SH AUTHOR
+.nf
+  Kirk Johnson <tuna@indra.com>
+.fi
+
+Patches, bug reports, and suggestions are welcome, but I can't
+guarantee that I'll get around to doing anything about them in a
+timely fashion.
